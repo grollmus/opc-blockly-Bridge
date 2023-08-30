@@ -1,0 +1,125 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <meta charset="utf-8" />
+    <title></title>
+</head>
+<body>
+    <div id="blocklyDiv" style="height: 480px; width: 600px;"></div>
+    <textarea id="textarea" rows="3"></textarea>
+    <button id="btnRun" onclick="btnRunClick()">Run</button>
+
+    <script src="js/blockly_compressed.js"></script>
+    <script src="js/blocks_compressed.js"></script>
+    <script src="js/javascript_compressed.js"></script>
+    <script src="js/de.js"></script>
+    <script>
+
+        var blockOpcWriteJson = {
+            "type": "opc_write",
+            "message0": "nodeID %1 %2 value %3",
+            "args0": [
+                {
+                    "type": "field_input",
+                    "name": "nodeId",
+                    "text": "ns=4;i=10"
+                },
+                {
+                    "type": "input_dummy"
+                },
+                {
+                    "type": "field_input",
+                    "name": "nodeValue",
+                    "text": "true"
+                }
+            ],
+            "previousStatement": null,
+            "nextStatement": null,
+            "colour": 230,
+            "tooltip": "",
+            "helpUrl": ""
+        };
+
+        Blockly.Blocks['opc_write'] = {
+            init: function () {
+                this.jsonInit(blockOpcWriteJson);
+            }
+        }
+
+        javascript.javascriptGenerator.forBlock['opc_write'] = function (block, generator) {
+            var text_nodeid = block.getFieldValue('nodeId');
+            var text_nodevalue = block.getFieldValue('nodeValue');
+            var code = "postData(\"https://localhost:7094/OPC/write\", { \"nodeID\": \"" + text_nodeid + "\", \"value\": " + text_nodevalue + " }).then((data) => { console.log(data); })\n";
+            return code;
+        };
+
+        const toolbox = {
+            "kind": "flyoutToolbox",
+            "contents": [
+                {
+                    "kind": "block",
+                    "type": "opc_write"
+                },
+                {
+                    "kind": "block",
+                    "type": "controls_if"
+                },
+                {
+                    "kind": "block",
+                    "type": "controls_repeat_ext"
+                },
+                {
+                    "kind": "block",
+                    "type": "logic_compare"
+                },
+                {
+                    "kind": "block",
+                    "type": "math_number"
+                },
+                {
+                    "kind": "block",
+                    "type": "math_arithmetic"
+                },
+                {
+                    "kind": "block",
+                    "type": "text"
+                },
+                {
+                    "kind": "block",
+                    "type": "text_print"
+                },
+            ]
+        }
+
+        const workspace = Blockly.inject('blocklyDiv', { toolbox: toolbox });
+
+        async function postData(url = "", data = {}) {
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(data),
+            });
+            return response;
+        }
+
+        function updateCode(event) {
+            const jsCode = javascript.javascriptGenerator.workspaceToCode(workspace);
+            document.getElementById('textarea').value = jsCode;
+        }
+        workspace.addChangeListener(updateCode);
+
+        function btnRunClick() {
+            console.log("btnRunClicked");
+            try {
+                eval(document.getElementById('textarea').value);
+            } catch (e) {
+                console.log(e);
+            }
+        }
+    </script>
+</body>
+
+</html>
