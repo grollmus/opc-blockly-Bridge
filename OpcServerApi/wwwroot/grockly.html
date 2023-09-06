@@ -28,7 +28,7 @@
                 {
                     "type": "field_input",
                     "name": "nodeId",
-                    "text": "ns=4;i=10"
+                    "text": "ns=4;i=4"
                 },
                 {
                     "type": "input_dummy"
@@ -52,6 +52,13 @@
             }
         }
 
+        javascript.javascriptGenerator.forBlock['opc_write'] = function (block, generator) {
+            var text_nodeid = block.getFieldValue('nodeId');
+            var text_nodevalue = block.getFieldValue('nodeValue');
+            var code = "postData(\"https://localhost:7094/OPC/write\", { \"nodeID\": \"" + text_nodeid + "\", \"value\": " + text_nodevalue + " }).then((data) => { console.log(data); })\n";
+            return code;
+        };
+
         var blockOpcReadJson = {
             "type": "opc_read",
             "message0": "nodeId %1",
@@ -59,7 +66,7 @@
                 {
                     "type": "field_input",
                     "name": "nodeId",
-                    "text": "ns=4;i=7"
+                    "text": "ns=4&id=7"
                 }
             ],
             "inputsInline": false,
@@ -75,20 +82,12 @@
             }
         }
 
-        javascript.javascriptGenerator.forBlock['opc_write'] = function (block, generator) {
-            var text_nodeid = block.getFieldValue('nodeId');
-            var text_nodevalue = block.getFieldValue('nodeValue');
-            var code = "postData(\"https://localhost:7094/OPC/write\", { \"nodeID\": \"" + text_nodeid + "\", \"value\": " + text_nodevalue + " }).then((data) => { console.log(data); })\n";
-            return code;
-        };
-
         javascript.javascriptGenerator.forBlock['opc_read'] = function (block, generator) {
             var text_nodeid = block.getFieldValue('nodeId');
-            // TODO: Assemble javascript into code variable.
-            var code = "getData(\"https://localhost:7094/OPC/read?ns=4&id=10\").then((data) => { data.json().then(x => console.log(x.value)); })";
-            // TODO: Change ORDER_NONE to the correct strength.
+            const url = "https://localhost:7094/OPC/read?" + text_nodeid;
+            const code = "getSynchronousData(\"" + url + "\")";
             return [code, javascript.Order.FUNCTION_CALL];
-        };
+        }
 
         const toolbox = {
             "kind": "flyoutToolbox",
@@ -134,14 +133,20 @@
 
         const workspace = Blockly.inject('blocklyDiv', { toolbox: toolbox });
 
-        async function getData(url = "") {
-            const response = await fetch(url, {
-                method: "GET",
-                headers: {
-                    "Content-Type": "application/json"
-                },
-            });
-            return response;
+        function synchronousRequest(url) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('GET', url, false);
+            xhr.send(null);
+            if (xhr.status === 200) {
+                return xhr.responseText;
+            } else {
+                throw new Error('Request failed: ' + xhr.statusText);
+            }
+        }
+
+        function getSynchronousData(url = "") {
+            const response = synchronousRequest(url);
+            return JSON.parse(response).value;
         }
         
         async function postData(url = "", data = {}) {
