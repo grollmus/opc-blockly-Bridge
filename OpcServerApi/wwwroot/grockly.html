@@ -3,11 +3,16 @@
 <html lang="en" xmlns="http://www.w3.org/1999/xhtml">
 <head>
     <meta charset="utf-8" />
-    <title></title>
+    <title>Grockly</title>
 </head>
 <body>
+    <div>
+        <a href="swagger" target="_blank">Swagger</a> (öffnet im neuen Fenster)
+    </div>
+    <h1>Grockly</h1>
+    <div>Grollmus Blockly</div>
     <div id="blocklyDiv" style="height: 480px; width: 600px;"></div>
-    <textarea id="textarea" rows="3"></textarea>
+    <textarea id="textarea" rows="6" style="width: 600px;"></textarea>
     <button id="btnRun" onclick="btnRunClick()">Run</button>
 
     <script src="js/blockly_compressed.js"></script>
@@ -80,7 +85,7 @@
         javascript.javascriptGenerator.forBlock['opc_read'] = function (block, generator) {
             var text_nodeid = block.getFieldValue('nodeId');
             // TODO: Assemble javascript into code variable.
-            var code = 'opc_read';
+            var code = "getData(\"https://localhost:7094/OPC/read?ns=4&id=10\").then((data) => { data.json().then(x => console.log(x.value)); })";
             // TODO: Change ORDER_NONE to the correct strength.
             return [code, javascript.Order.FUNCTION_CALL];
         };
