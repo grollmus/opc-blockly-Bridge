@@ -47,11 +47,42 @@
             }
         }
 
+        var blockOpcReadJson = {
+            "type": "opc_read",
+            "message0": "nodeId %1",
+            "args0": [
+                {
+                    "type": "field_input",
+                    "name": "nodeId",
+                    "text": "ns=4;i=7"
+                }
+            ],
+            "inputsInline": false,
+            "output": "Boolean",
+            "colour": 345,
+            "tooltip": "",
+            "helpUrl": ""
+        };
+
+        Blockly.Blocks['opc_read'] = {
+            init: function () {
+                this.jsonInit(blockOpcReadJson);
+            }
+        }
+
         javascript.javascriptGenerator.forBlock['opc_write'] = function (block, generator) {
             var text_nodeid = block.getFieldValue('nodeId');
             var text_nodevalue = block.getFieldValue('nodeValue');
             var code = "postData(\"https://localhost:7094/OPC/write\", { \"nodeID\": \"" + text_nodeid + "\", \"value\": " + text_nodevalue + " }).then((data) => { console.log(data); })\n";
             return code;
+        };
+
+        javascript.javascriptGenerator.forBlock['opc_read'] = function (block, generator) {
+            var text_nodeid = block.getFieldValue('nodeId');
+            // TODO: Assemble javascript into code variable.
+            var code = 'opc_read';
+            // TODO: Change ORDER_NONE to the correct strength.
+            return [code, javascript.Order.FUNCTION_CALL];
         };
 
         const toolbox = {
@@ -60,6 +91,10 @@
                 {
                     "kind": "block",
                     "type": "opc_write"
+                },
+                {
+                    "kind": "block",
+                    "type": "opc_read"
                 },
                 {
                     "kind": "block",
