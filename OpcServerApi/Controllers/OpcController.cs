@@ -18,13 +18,14 @@ public class OpcController : ControllerBase
     }
 
     [HttpGet("read")]
-    public async Task<ActionResult<PostValueDto>> Read(GetValueDto getValue)
+    public async Task<ActionResult<PostValueDto>> Read([FromQuery]string ns, [FromQuery]string id)
     {
-        var result = await _opcClient.Read(getValue);
+        var getValueDto = new GetValueDto($"ns={ns};i={id}");
+        var result = await _opcClient.Read(getValueDto);
         return new PostValueDto
         {
             Value = result,
-            NodeId = getValue.NodeId
+            NodeId = getValueDto.NodeId 
         };
     }
 
