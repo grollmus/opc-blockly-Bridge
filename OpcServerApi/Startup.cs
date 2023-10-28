@@ -14,6 +14,15 @@ public class Startup
 
     public void ConfigureServices(IServiceCollection services)
     {
+        services.AddCors(options =>
+        {
+            options.AddPolicy("AllowAll", builder =>
+            {
+                builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            });
+        });
         services.AddApplicationServices(_config);
         services.AddControllers();
         services.AddSwaggerGen();
@@ -33,6 +42,8 @@ public class Startup
         app.UseHttpsRedirection();
         
         app.UseRouting();
+        
+        app.UseCors("AllowAll");
 
         app.UseAuthorization();
 
