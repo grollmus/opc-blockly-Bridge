@@ -9,6 +9,8 @@
     <div>
         <a href="swagger" target="_blank">Swagger</a> (öffnet im neuen Fenster)
     </div>
+    <h1>Bohrmodell</h1>
+    <div><span id="band1">Band 1</span> <span id="band2">Band 2</span> <span id="band3">Band 3</span> <button id="btnUpdate" onclick="updateHMI()">Update</button></div>
     <h1>Grockly</h1>
     <div>Grollmus Blockly</div>
     <div id="blocklyDiv" style="height: 480px; width: 600px;"></div>
@@ -133,7 +135,7 @@
 
         const workspace = Blockly.inject('blocklyDiv', { toolbox: toolbox });
 
-        function synchronousRequest(url) {
+        function synchronousRequest(url = "") {
             const xhr = new XMLHttpRequest();
             xhr.open('GET', url, false);
             xhr.send(null);
@@ -173,6 +175,40 @@
             } catch (e) {
                 console.log(e);
             }
+            updateHMI();
+        }
+
+        setInterval(updateHMI, 1000);
+
+        function updateHMI() {
+            console.log("btnUpdateClick");
+
+            
+            if (getSynchronousData("https://localhost:7094/OPC/read?ns=4&id=7") == true) {
+                document.getElementById('band1').style = "color:green";
+            } else {
+                document.getElementById('band1').style = "color:red";
+            }
+
+            
+            setTimeout(function () {
+                if (getSynchronousData("https://localhost:7094/OPC/read?ns=4&id=13") == true) {
+                    document.getElementById('band2').style = "color:green";
+                } else {
+                    document.getElementById('band2').style = "color:red";
+                }
+            }, 200);
+
+
+            setTimeout(function () {
+                if (getSynchronousData("https://localhost:7094/OPC/read?ns=4&id=19") == true) {
+                    document.getElementById('band3').style = "color:green";
+                } else {
+                    document.getElementById('band3').style = "color:red";
+                }
+            }, 400);
+            
+
         }
     </script>
 </body>
